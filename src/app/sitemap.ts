@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next'
-import { createClient } from '@/lib/supabase/server'
+
+export const dynamic = 'force-static'
+export const revalidate = 3600 // Revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://missionfrica.com'
@@ -38,28 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Dynamic missionary pages
-  let missionaryPages: MetadataRoute.Sitemap = []
-  
-  try {
-    const supabase = await createClient()
-    
-    const { data: missionaries } = await supabase
-      .from('missionary_profiles')
-      .select('id, updated_at')
-      .eq('is_verified', true)
-
-    if (missionaries) {
-      missionaryPages = missionaries.map((missionary) => ({
-        url: `${baseUrl}/missionary/${missionary.id}`,
-        lastModified: new Date(missionary.updated_at || new Date()),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      }))
-    }
-  } catch (error) {
-    console.error('Error fetching missionaries for sitemap:', error)
-  }
-
-  return [...staticPages, ...missionaryPages]
+  // Note: Dynamic missionary pages will be added via ISR or separate sitemap generation
+  // For now, just return static pages to avoid build errors
+  return staticPages
 }

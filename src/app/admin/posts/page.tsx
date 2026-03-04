@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -28,7 +28,7 @@ interface Post {
   missionary_id: string
 }
 
-export default function AdminPostsPage() {
+function PostsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
@@ -216,5 +216,17 @@ export default function AdminPostsPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function AdminPostsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="h-12 w-12 animate-spin text-faith-600" />
+      </div>
+    }>
+      <PostsContent />
+    </Suspense>
   )
 }
